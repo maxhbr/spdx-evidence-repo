@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-name: spdx/tools-java workflow
+name: validation workflow
 on:
   pull_request:
     branches:
