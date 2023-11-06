@@ -42,17 +42,16 @@ main() {
     local root="$1"
     local failed="$(mktemp)"
 
-    local wrappers=("$SCRIPT_DIR/spdx-tools-java-wrapper.sh")
-    for wrapper in "${wrappers[@]}"; do
-        echo "run $wrapper"
-        main_for_wrapper "$wrapper" "$root" "$failed"
-    done
+    main_for_wrapper "$SCRIPT_DIR/spdx-tools-java-wrapper.sh" "$root" "$failed"
+    main_for_wrapper "$SCRIPT_DIR/spdx-tools-python-wrapper.sh" "$root" "$failed"
 
-    if [[ -s "$failed" ]]; then
+    cat "$failed" | sort -u > "$failed".sorted
+
+    if [[ -s "$failed".sorted ]]; then
         local count
-        count=$(wc -l < "$failed")
+        count=$(wc -l < "$failed".sorted)
         echo -e "### The following $count \`.spdx\` files are invalid :x: (see the job logs for details)\n$(cat "$failed")" > "$GITHUB_STEP_SUMMARY"
-        cat "$failed" > "$GITHUB_STEP_SUMMARY"
+        cat "$failed".sorted > "$GITHUB_STEP_SUMMARY"
         exit 1
     else
         echo "### All \`.spdx\` files are valid :heavy_check_mark:" > "$GITHUB_STEP_SUMMARY"
