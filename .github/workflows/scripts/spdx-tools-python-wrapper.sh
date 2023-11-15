@@ -20,31 +20,43 @@ bootstrap() {
     ./venv/bin/pyspdxtools  --help
 }
 
+load_venv() {
+    if [[ ! -f "./venv/bin/activate" ]]; then
+        bootstrap
+    fi
+
+    . ./venv/bin/activate
+}
+
 verify() {
     local spdx="$1"
 
     >&2 echo "Verify $spdx"
 
-    ./venv/bin/pyspdxtools -i "$spdx"
+    set -x
+    ./venv/bin/pyspdxtools --infile "$spdx"
 }
 
 if [[ "$1" == "bootstrap" ]]; then
     bootstrap
-elif [[ "$1" == "verify" ]]; then
-    shift
-    verify "$@"
-elif [[ "$1" == "get-supported-versions" ]]; then
-    cat <<EOF
+else
+    load_venv
+    if [[ "$1" == "verify" ]]; then
+        shift
+        verify "$@"
+    elif [[ "$1" == "get-supported-versions" ]]; then
+        cat <<EOF
 SPDX-2.3
 EOF
-elif [[ "$1" == "get-supported-extensions" ]]; then
-    cat <<EOF
+    elif [[ "$1" == "get-supported-extensions" ]]; then
+        cat <<EOF
 .spdx
 .rdf.xml
 .spdx.json
 .spdx.xml
 .spdx.yaml
 EOF
-else
-    exit 1
+    else
+        exit 1
+    fi
 fi
